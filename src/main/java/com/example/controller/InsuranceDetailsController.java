@@ -22,8 +22,10 @@ import com.example.dto.InsuranceDetailsDto;
 import com.example.dto.InsurenceRequestDto;
 import com.example.entity.InsuranceDetails;
 import com.example.formgenerations.UserExcelExporter;
+import com.example.formgenerations.UserPDFExporter;
 import com.example.repo.InsurancePlanRepo;
 import com.example.service.InsuranceDetailsServiceInterface;
+import com.lowagie.text.DocumentException;
 
 
 
@@ -59,7 +61,7 @@ public class InsuranceDetailsController {
 	public ResponseEntity<List<String>> getAllPlanStatus(){
 		return new ResponseEntity<>(service.getAllPlanStatus(),HttpStatus.OK);
 	}
-	@GetMapping("/users/export/excel")
+	@GetMapping("/excel")
     public void exportToExcel(HttpServletResponse response) throws IOException {
         response.setContentType("application/octet-stream");
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
@@ -74,7 +76,23 @@ public class InsuranceDetailsController {
         UserExcelExporter excelExporter = new UserExcelExporter(listUsers);
          
         excelExporter.export(response);    
-    }  
+    }
+	 @GetMapping("/pdf")
+	    public void exportToPDF(HttpServletResponse response) throws DocumentException, IOException {
+	        response.setContentType("application/pdf");
+	        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+	        String currentDateTime = dateFormatter.format(new Date());
+	         
+	        String headerKey = "Content-Disposition";
+	        String headerValue = "attachment; filename=users_" + currentDateTime + ".pdf";
+	        response.setHeader(headerKey, headerValue);
+	         
+	        List<InsuranceDetails> listUsers = service.listAll();
+	         System.out.println(listUsers);
+	        UserPDFExporter exporter = new UserPDFExporter(listUsers);
+	        exporter.export(response);
+	         
+	    }
 	
 
 }
